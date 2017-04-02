@@ -1,6 +1,6 @@
 Pod::Spec.new do |spec|
   spec.name         = 'Curve25519Kit'
-  spec.version      = '2.0.2'
+  spec.version      = '2.1.0'
   spec.license      = { :type => 'GPLv3' }
   spec.homepage     = 'https://github.com/WhisperSystems/Curve25519Kit'
   spec.preserve_path = 'Sources/ed25519/**/*.{c,h}'
