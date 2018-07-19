@@ -17,4 +17,7 @@ Pod::Spec.new do |spec|
   spec.framework    = 'Security'
   spec.public_header_files = "Classes/*.h"
   spec.requires_arc = true
+  spec.test_spec 'Tests' do |test_spec|
+    test_spec.source_files = 'Tests/**/*.{h,m,swift}'
+  end
 end
