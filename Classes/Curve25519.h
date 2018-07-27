@@ -11,8 +11,8 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface ECKeyPair : NSObject <NSSecureCoding>
 
-@property(atomic, readonly) NSData *publicKey;
-@property(atomic, readonly) NSData *privateKey;
+@property (atomic, readonly) NSData *publicKey;
+@property (atomic, readonly) NSData *privateKey;
 
 - (instancetype)init NS_UNAVAILABLE;
 
