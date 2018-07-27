@@ -35,9 +35,7 @@ curve25519_verify(const unsigned char *signature,         /* 64 bytes */
         @throw [NSException exceptionWithName:NSInvalidArgumentException reason:@"Data needs to be at least one byte" userInfo:nil];
     }
     if ([data length] >= ULONG_MAX) {
-      @throw [NSException exceptionWithName:NSInvalidArgumentException
-                                     reason:@"Data is too long"
-                                   userInfo:nil];
+        @throw [NSException exceptionWithName:NSInvalidArgumentException reason:@"Data is too long" userInfo:nil];
     }
 
     if ([pubKey length] != ECCKeyLength) {
