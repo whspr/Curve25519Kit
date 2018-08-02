@@ -1,15 +1,14 @@
 //
 //  Copyright (c) 2018 Open Whisper Systems. All rights reserved.
 //
-
 #import "Curve25519.h"
 #import "Randomness.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
-NSString * const TSECKeyPairPublicKey   = @"TSECKeyPairPublicKey";
-NSString * const TSECKeyPairPrivateKey  = @"TSECKeyPairPrivateKey";
-NSString * const TSECKeyPairPreKeyId    = @"TSECKeyPairPreKeyId";
+NSString *const TSECKeyPairPublicKey = @"TSECKeyPairPublicKey";
+NSString *const TSECKeyPairPrivateKey = @"TSECKeyPairPrivateKey";
+NSString *const TSECKeyPairPreKeyId = @"TSECKeyPairPreKeyId";
 
 extern void curve25519_donna(unsigned char *output, const unsigned char *a, const unsigned char *b);
 
@@ -21,16 +20,19 @@ extern int curve25519_sign(unsigned char *signature_out, /* 64 bytes */
 
 @implementation ECKeyPair
 
-+ (BOOL)supportsSecureCoding {
++ (BOOL)supportsSecureCoding
+{
     return YES;
 }
 
--(void)encodeWithCoder:(NSCoder *)coder {
+- (void)encodeWithCoder:(NSCoder *)coder
+{
     [coder encodeBytes:self.publicKey.bytes length:ECCKeyLength forKey:TSECKeyPairPublicKey];
     [coder encodeBytes:self.privateKey.bytes length:ECCKeyLength forKey:TSECKeyPairPrivateKey];
 }
 
-- (nullable id)initWithCoder:(NSCoder *)coder {
+- (nullable instancetype)initWithCoder:(NSCoder *)coder
+{
     self = [super init];
     if (self) {
         NSUInteger returnedLength = 0;
@@ -52,16 +54,20 @@ extern int curve25519_sign(unsigned char *signature_out, /* 64 bytes */
     return self;
 }
 
-- (nullable id)initWithPublicKey:(NSData *)publicKey
-                      privateKey:(NSData *)privateKey {
+- (nullable id)initWithPublicKey:(NSData *)publicKey privateKey:(NSData *)privateKey
+{
     if (self = [super init]) {
+        if (publicKey.length != ECCKeyLength || privateKey.length != ECCKeyLength) {
+            return nil;
+        }
         _publicKey = publicKey;
         _privateKey = privateKey;
     }
     return self;
 }
 
-+ (ECKeyPair *)generateKeyPair {
++ (ECKeyPair *)generateKeyPair
+{
     // Generate key pair as described in
     // https://code.google.com/p/curve25519-donna/
     NSMutableData *privateKey = [[Randomness generateRandomBytes:ECCKeyLength] mutableCopy];
@@ -80,7 +86,8 @@ extern int curve25519_sign(unsigned char *signature_out, /* 64 bytes */
     return [[ECKeyPair alloc] initWithPublicKey:[publicKey copy] privateKey:[privateKey copy]];
 }
 
-- (NSData *)sign:(NSData *)data {
+- (NSData *)sign:(NSData *)data
+{
     NSMutableData *signatureData = [NSMutableData dataWithLength:ECCSignatureLength];
     if (!signatureData) {
         @throw
@@ -100,7 +107,8 @@ extern int curve25519_sign(unsigned char *signature_out, /* 64 bytes */
     return [signatureData copy];
 }
 
-- (NSData *)generateSharedSecretFromPublicKey:(NSData *)theirPublicKey {
+- (NSData *)generateSharedSecretFromPublicKey:(NSData *)theirPublicKey
+{
 
     if ([theirPublicKey length] != ECCKeyLength) {
         @throw [NSException exceptionWithName:NSInvalidArgumentException
@@ -125,12 +133,13 @@ extern int curve25519_sign(unsigned char *signature_out, /* 64 bytes */
 
 @implementation Curve25519
 
-+ (ECKeyPair *)generateKeyPair {
++ (ECKeyPair *)generateKeyPair
+{
     return [ECKeyPair generateKeyPair];
 }
 
-+ (NSData *)generateSharedSecretFromPublicKey:(NSData *)theirPublicKey
-                                   andKeyPair:(ECKeyPair *)keyPair {
++ (NSData *)generateSharedSecretFromPublicKey:(NSData *)theirPublicKey andKeyPair:(ECKeyPair *)keyPair
+{
     return [keyPair generateSharedSecretFromPublicKey:theirPublicKey];
 }
 

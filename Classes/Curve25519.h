@@ -1,7 +1,6 @@
 //
 //  Copyright (c) 2018 Open Whisper Systems. All rights reserved.
 //
-
 #import <Foundation/Foundation.h>
 
 NS_ASSUME_NONNULL_BEGIN
@@ -22,6 +21,8 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface Curve25519 : NSObject
 
+- (instancetype)init NS_UNAVAILABLE;
+
 /**
  *  Generate a 32-byte shared secret from a public key and a key pair using curve25519.
  *
@@ -30,14 +31,14 @@ NS_ASSUME_NONNULL_BEGIN
  *
  *  @return 32-byte shared secret derived from ECDH with curve25519 public key and key pair.
  */
-+ (NSData*)generateSharedSecretFromPublicKey:(NSData*)theirPublicKey andKeyPair:(ECKeyPair*)keyPair;
++ (NSData *)generateSharedSecretFromPublicKey:(NSData *)theirPublicKey andKeyPair:(ECKeyPair *)keyPair;
 
 /**
  *  Generate a curve25519 key pair
  *
  *  @return curve25519 key pair.
  */
-+ (ECKeyPair*)generateKeyPair;
++ (ECKeyPair *)generateKeyPair;
 
 @end
 

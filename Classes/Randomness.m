@@ -6,7 +6,8 @@
 
 @implementation Randomness
 
-+ (NSData *)generateRandomBytes:(int)numberBytes {
++ (NSData *)generateRandomBytes:(int)numberBytes
+{
     NSMutableData *_Nullable randomBytes = [NSMutableData dataWithLength:numberBytes];
     if (!randomBytes) {
         @throw [NSException exceptionWithName:@"random problem" reason:@"problem generating the random " userInfo:nil];

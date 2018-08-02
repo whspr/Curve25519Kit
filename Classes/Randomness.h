@@ -14,7 +14,7 @@
  *  @return Random Bytes.
  */
 
-+(NSData*) generateRandomBytes:(int)numberBytes;
++ (NSData *)generateRandomBytes:(int)numberBytes;
 
 
 @end
