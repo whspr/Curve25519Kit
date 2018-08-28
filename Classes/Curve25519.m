@@ -2,8 +2,8 @@
 //  Copyright (c) 2018 Open Whisper Systems. All rights reserved.
 //
 #import "Curve25519.h"
-#import "CKAsserts.h"
 #import "Randomness.h"
+#import "SCKAsserts.h"
 
 NS_ASSUME_NONNULL_BEGIN
 

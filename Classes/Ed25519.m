@@ -3,8 +3,8 @@
 //
 
 #import "Ed25519.h"
-#import "CKAsserts.h"
 #import "Curve25519.h"
+#import "SCKAsserts.h"
 
 extern int curve25519_verify(const unsigned char *signature, /* 64 bytes */
     const unsigned char *curve25519_pubkey, /* 32 bytes */

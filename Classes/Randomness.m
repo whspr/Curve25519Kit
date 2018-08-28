@@ -3,7 +3,7 @@
 //
 
 #import "Randomness.h"
-#import "CKAsserts.h"
+#import "SCKAsserts.h"
 
 @implementation Randomness
 
@@ -15,7 +15,7 @@
     }
     int err = 0;
     err = SecRandomCopyBytes(kSecRandomDefault, numberBytes, [randomBytes mutableBytes]);
-    if (err != noErr && randomBytes.length != numberBytes) {
+    if (err != noErr || randomBytes.length != numberBytes) {
         OWSFail(@"Could not generate random bytes.");
     }
     return [randomBytes copy];
