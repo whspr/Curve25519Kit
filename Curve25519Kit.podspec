@@ -17,4 +17,6 @@ Pod::Spec.new do |spec|
   spec.framework    = 'Security'
   spec.public_header_files = "Classes/*.h"
   spec.requires_arc = true
+
+  spec.dependency 'CocoaLumberjack'
 end
