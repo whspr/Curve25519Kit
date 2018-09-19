@@ -79,8 +79,10 @@ extern int curve25519_sign(unsigned char *signature_out, /* 64 bytes */
 
     static const uint8_t basepoint[ECCKeyLength] = { 9 };
 
-    NSMutableData *publicKey = [NSMutableData new];
-    publicKey.length = ECCKeyLength;
+    NSMutableData *publicKey = [NSMutableData dataWithLength:ECCKeyLength];
+    if (!publicKey) {
+        OWSFail(@"Could not allocate buffer");
+    }
 
     curve25519_donna(publicKey.mutableBytes, privateKey.mutableBytes, basepoint);
 
@@ -89,6 +91,10 @@ extern int curve25519_sign(unsigned char *signature_out, /* 64 bytes */
 
 - (NSData *)sign:(NSData *)data
 {
+    if (!data) {
+        OWSRaiseException(NSInvalidArgumentException, @"Missing data.");
+    }
+
     NSMutableData *signatureData = [NSMutableData dataWithLength:ECCSignatureLength];
     if (!signatureData) {
         OWSFail(@"Could not allocate buffer");
@@ -118,12 +124,15 @@ extern int curve25519_sign(unsigned char *signature_out, /* 64 bytes */
 
 + (NSData *)generateSharedSecretFromPublicKey:(NSData *)theirPublicKey andKeyPair:(ECKeyPair *)keyPair
 {
+    if (!keyPair) {
+        OWSRaiseException(NSInvalidArgumentException, @"Missing key pair.");
+    }
+
     return [self generateSharedSecretFromPublicKey:theirPublicKey privateKey:keyPair.privateKey];
 }
 
 + (NSData *)generateSharedSecretFromPublicKey:(NSData *)publicKey privateKey:(NSData *)privateKey
 {
-
     if (publicKey.length != ECCKeyLength) {
         OWSRaiseException(
                           NSInvalidArgumentException, @"Public key has unexpected length: %lu", (unsigned long)publicKey.length);
