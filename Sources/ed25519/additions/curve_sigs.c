@@ -86,7 +86,6 @@ int curve25519_verify(const unsigned char* signature,
   }
 
   if ((verifybuf2 = malloc(msg_len + 64)) == 0) {
-    free(verifybuf);
     result = -1;
     goto err;
   }
