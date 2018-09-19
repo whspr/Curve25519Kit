@@ -19,4 +19,8 @@ Pod::Spec.new do |spec|
   spec.requires_arc = true
 
   spec.dependency 'CocoaLumberjack'
+
+  spec.test_spec 'Tests' do |test_spec|
+    test_spec.source_files = 'BuildTests/BuildTestsTests/**/*.{h,m,swift}'
+  end
 end
