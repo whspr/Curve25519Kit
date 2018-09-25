@@ -18,6 +18,7 @@ Pod::Spec.new do |spec|
   spec.framework    = 'Security'
   spec.public_header_files = "Classes/*.h"
   spec.requires_arc = true
+  spec.ios.deployment_target = "9.0"
 
   spec.dependency 'CocoaLumberjack'
   spec.dependency 'SignalCoreKit'
