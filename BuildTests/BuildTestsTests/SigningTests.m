@@ -8,7 +8,7 @@
 
 #import <XCTest/XCTest.h>
 #import "Curve25519.h"
-#import "Randomness.h"
+#import <SignalCoreKit/Randomness.h>
 #import "Ed25519.h"
 
 @interface SigningTests : XCTestCase

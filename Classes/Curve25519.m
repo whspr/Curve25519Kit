@@ -3,7 +3,7 @@
 //
 
 #import "Curve25519.h"
-#import "Randomness.h"
+#import <SignalCoreKit/Randomness.h>
 #import <SignalCoreKit/OWSAsserts.h>
 
 NS_ASSUME_NONNULL_BEGIN
