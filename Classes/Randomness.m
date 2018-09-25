@@ -3,7 +3,7 @@
 //
 
 #import "Randomness.h"
-#import "SCKAsserts.h"
+#import <SignalCoreKit/OWSAsserts.h>
 
 @implementation Randomness
 
