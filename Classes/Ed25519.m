@@ -23,9 +23,11 @@ extern int curve25519_verify(const unsigned char *signature, /* 64 bytes */
 
 + (NSData *)sign:(NSData *)data withKeyPair:(ECKeyPair *)keyPair
 {
-
     if ([data length] < 1) {
         OWSRaiseException(NSInvalidArgumentException, @"Data needs to be at least one byte");
+    }
+    if (!keyPair) {
+        OWSRaiseException(NSInvalidArgumentException, @"Missing key pair.");
     }
 
     return [keyPair sign:data];
@@ -33,7 +35,6 @@ extern int curve25519_verify(const unsigned char *signature, /* 64 bytes */
 
 + (BOOL)verifySignature:(NSData *)signature publicKey:(NSData *)pubKey data:(NSData *)data
 {
-
     if ([data length] < 1) {
         OWSRaiseException(NSInvalidArgumentException, @"Data needs to be at least one byte");
     }
