@@ -3,8 +3,9 @@
 //
 
 #import "Curve25519.h"
-#import <SignalCoreKit/Randomness.h>
 #import <SignalCoreKit/OWSAsserts.h>
+#import <SignalCoreKit/Randomness.h>
+#import <SignalCoreKit/SCKExceptionWrapper.h>
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -90,7 +91,7 @@ extern int curve25519_sign(unsigned char *signature_out, /* 64 bytes */
     return [[ECKeyPair alloc] initWithPublicKey:[publicKey copy] privateKey:[privateKey copy]];
 }
 
-- (NSData *)sign:(NSData *)data
+- (NSData *)throws_sign:(NSData *)data
 {
     if (!data) {
         OWSRaiseException(NSInvalidArgumentException, @"Missing data.");
@@ -123,16 +124,28 @@ extern int curve25519_sign(unsigned char *signature_out, /* 64 bytes */
     return [ECKeyPair generateKeyPair];
 }
 
-+ (NSData *)generateSharedSecretFromPublicKey:(NSData *)theirPublicKey andKeyPair:(ECKeyPair *)keyPair
++ (NSData *)throws_generateSharedSecretFromPublicKey:(NSData *)theirPublicKey andKeyPair:(ECKeyPair *)keyPair
 {
     if (!keyPair) {
         OWSRaiseException(NSInvalidArgumentException, @"Missing key pair.");
     }
 
-    return [self generateSharedSecretFromPublicKey:theirPublicKey privateKey:keyPair.privateKey];
+    return [self throws_generateSharedSecretFromPublicKey:theirPublicKey privateKey:keyPair.privateKey];
 }
 
-+ (NSData *)generateSharedSecretFromPublicKey:(NSData *)publicKey privateKey:(NSData *)privateKey
++ (nullable NSData *)generateSharedSecretFromPublicKey:(NSData *)publicKey
+                                            privateKey:(NSData *)privateKey
+                                                 error:(NSError **)outError
+{
+    @try {
+        return [self throws_generateSharedSecretFromPublicKey:publicKey privateKey:privateKey];
+    } @catch (NSException *exception) {
+        *outError = SCKExceptionWrapperErrorMake(exception);
+        return nil;
+    }
+}
+
++ (NSData *)throws_generateSharedSecretFromPublicKey:(NSData *)publicKey privateKey:(NSData *)privateKey
 {
     if (publicKey.length != ECCKeyLength) {
         OWSRaiseException(
