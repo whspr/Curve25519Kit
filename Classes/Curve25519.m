@@ -26,43 +26,21 @@ extern void curve25519_donna(unsigned char *output, const unsigned char *a, cons
     return YES;
 }
 
-- (void)encodeWithCoder:(NSCoder *)coder
++ (Class)classForKeyedUnarchiver
 {
-    [coder encodeBytes:self.publicKey.bytes length:ECCKeyLength forKey:TSECKeyPairPublicKey];
-    [coder encodeBytes:self.privateKey.bytes length:ECCKeyLength forKey:TSECKeyPairPrivateKey];
+    return [ECKeyPairImpl class];
 }
 
-- (nullable instancetype)initWithCoder:(NSCoder *)coder
+- (nullable instancetype)initWithCoder:(nonnull NSCoder *)coder
 {
-    NSUInteger returnedLength = 0;
-    const uint8_t *returnedBuffer = NULL;
+    // FIXME: This should never be called thanks to +classForKeyedUnarchiver above,
+    // but there's a test in SignalServiceKit that calls it directly.
+    return [[ECKeyPairImpl alloc] initWithCoder:coder];
+}
 
-    // De-serialize public key
-    returnedBuffer = [coder decodeBytesForKey:TSECKeyPairPublicKey returnedLength:&returnedLength];
-    if (returnedLength != ECCKeyLength) {
-        OWSFailDebug(@"failure: wrong length for public key.");
-        return nil;
-    }
-    NSData *publicKeyData = [NSData dataWithBytes:returnedBuffer length:returnedLength];
-
-    // De-serialize private key
-    returnedBuffer = [coder decodeBytesForKey:TSECKeyPairPrivateKey returnedLength:&returnedLength];
-    if (returnedLength != ECCKeyLength) {
-        OWSFailDebug(@"failure: wrong length for private key.");
-        return nil;
-    }
-    NSData *privateKeyData = [NSData dataWithBytes:returnedBuffer length:returnedLength];
-
-    NSError *error;
-    ECKeyPair *keyPair = [self initWithPublicKeyData:publicKeyData
-                                      privateKeyData:privateKeyData
-                                               error:&error];
-    if (error != nil) {
-        OWSFailDebug(@"error: %@", error);
-        return nil;
-    }
-
-    return keyPair;
+- (void)encodeWithCoder:(nonnull NSCoder *)coder
+{
+    OWSFail(@"Implemented by subclass; should never be called directly");
 }
 
 /**

@@ -37,15 +37,14 @@ public extension ECKeyPair {
 
 /// A transitionary class. Do not use directly; continue using ECKeyPair instead.
 public class ECKeyPairImpl: ECKeyPair {
+    private static let TSECKeyPairPublicKey = "TSECKeyPairPublicKey"
+    private static let TSECKeyPairPrivateKey = "TSECKeyPairPrivateKey"
+
     fileprivate let storedKeyPair: IdentityKeyPair
 
     fileprivate init(_ keyPair: IdentityKeyPair) {
         storedKeyPair = keyPair
         super.init(fromClassClusterSubclassOnly: ())
-    }
-
-    private override init(fromClassClusterSubclassOnly: ()) {
-        fatalError("only used as an intermediary initializer")
     }
 
     public override convenience init(publicKeyData: Data, privateKeyData: Data) throws {
@@ -54,6 +53,45 @@ public class ECKeyPairImpl: ECKeyPair {
         let privateKey = try PrivateKey(privateKeyData)
 
         self.init(IdentityKeyPair(publicKey: publicKey, privateKey: privateKey))
+    }
+
+    public required convenience init?(coder: NSCoder) {
+        var returnedLength = 0
+
+        let publicKeyBuffer = coder.decodeBytes(forKey: Self.TSECKeyPairPublicKey, returnedLength: &returnedLength)
+        guard returnedLength == ECCKeyLength else {
+            owsFailDebug("failure: wrong length for public key.")
+            return nil
+        }
+        let publicKeyData = Data(bytes: publicKeyBuffer!, count: returnedLength)
+
+        let privateKeyBuffer = coder.decodeBytes(forKey: Self.TSECKeyPairPrivateKey, returnedLength: &returnedLength)
+        guard returnedLength == ECCKeyLength else {
+            owsFailDebug("failure: wrong length for private key.")
+            return nil
+        }
+        let privateKeyData = Data(bytes: privateKeyBuffer!, count: returnedLength)
+
+        do {
+            try self.init(publicKeyData: publicKeyData, privateKeyData: privateKeyData)
+        } catch {
+            owsFailDebug("error: \(error)")
+            return nil
+        }
+    }
+
+    public override func encode(with coder: NSCoder) {
+        // Go through ECPublicKey to drop the type byte.
+        try! self.identityKeyPair.publicKey.keyBytes().withUnsafeBufferPointer {
+            coder.encodeBytes($0.baseAddress, length: $0.count, forKey: Self.TSECKeyPairPublicKey)
+        }
+        try! self.identityKeyPair.privateKey.serialize().withUnsafeBufferPointer {
+            coder.encodeBytes($0.baseAddress, length: $0.count, forKey: Self.TSECKeyPairPrivateKey)
+        }
+    }
+
+    public override class var supportsSecureCoding: Bool {
+        return true
     }
 
     public override var classForCoder: AnyClass {

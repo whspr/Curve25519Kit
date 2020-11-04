@@ -24,7 +24,7 @@ NS_ASSUME_NONNULL_BEGIN
                                 privateKeyData:(NSData *)privateKeyData
                                          error:(NSError **)error NS_DESIGNATED_INITIALIZER;
 
-- (nullable instancetype)initWithCoder:(NSCoder *)coder; // convenience initializer
+- (nullable instancetype)initWithCoder:(NSCoder *)coder NS_DESIGNATED_INITIALIZER;
 
 /**
  * A transitionary interface, only to be called from within the implementation of ECKeyPair's class cluster.
