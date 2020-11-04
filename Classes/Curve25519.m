@@ -1,30 +1,25 @@
 //
-//  Copyright (c) 2019 Open Whisper Systems. All rights reserved.
+//  Copyright (c) 2020 Open Whisper Systems. All rights reserved.
 //
 
 #import "Curve25519.h"
+#import <Curve25519Kit/Curve25519Kit-Swift.h>
 #import <SignalCoreKit/OWSAsserts.h>
 #import <SignalCoreKit/Randomness.h>
 #import <SignalCoreKit/SCKExceptionWrapper.h>
 
 NS_ASSUME_NONNULL_BEGIN
 
-
-NSErrorDomain const Curve25519KitErrorDomain = @"Curve25519KitErrorDomain";
-
-NSString *const TSECKeyPairPublicKey = @"TSECKeyPairPublicKey";
-NSString *const TSECKeyPairPrivateKey = @"TSECKeyPairPrivateKey";
-NSString *const TSECKeyPairPreKeyId = @"TSECKeyPairPreKeyId";
-
 extern void curve25519_donna(unsigned char *output, const unsigned char *a, const unsigned char *b);
 
-extern int curve25519_sign(unsigned char *signature_out, /* 64 bytes */
-    const unsigned char *curve25519_privkey, /* 32 bytes */
-    const unsigned char *msg,
-    const unsigned long msg_len,
-    const unsigned char *random); /* 64 bytes */
+@interface ECKeyPair (ImplementedInSwift)
+- (nullable NSData *)sign:(NSData *)data error:(NSError **)error;
+@end
 
 @implementation ECKeyPair
+
+@dynamic publicKey;
+@dynamic privateKey;
 
 + (BOOL)supportsSecureCoding
 {
@@ -78,44 +73,20 @@ extern int curve25519_sign(unsigned char *signature_out, /* 64 bytes */
                                 privateKeyData:(NSData *)privateKeyData
                                          error:(NSError **)error
 {
-    if (self = [super init]) {
-        if (publicKeyData.length != ECCKeyLength || privateKeyData.length != ECCKeyLength) {
-            *error = [NSError errorWithDomain:Curve25519KitErrorDomain
-                                         code:Curve25519KitError_InvalidKeySize
-                                     userInfo:nil];
-            return nil;
-        }
-        _publicKey = publicKeyData;
-        _privateKey = privateKeyData;
-    }
+    return [[ECKeyPairImpl alloc] initWithPublicKeyData:publicKeyData
+                                         privateKeyData:privateKeyData
+                                                  error:error];
+}
+
+- (instancetype)initFromClassClusterSubclassOnly
+{
+    self = [super init];
     return self;
 }
 
 + (ECKeyPair *)generateKeyPair
 {
-    // Generate key pair as described in
-    // https://code.google.com/p/curve25519-donna/
-    NSMutableData *privateKey = [[Randomness generateRandomBytes:ECCKeyLength] mutableCopy];
-    uint8_t *privateKeyBytes = privateKey.mutableBytes;
-    privateKeyBytes[0] &= 248;
-    privateKeyBytes[31] &= 127;
-    privateKeyBytes[31] |= 64;
-
-    static const uint8_t basepoint[ECCKeyLength] = { 9 };
-
-    NSMutableData *publicKey = [NSMutableData dataWithLength:ECCKeyLength];
-    if (!publicKey) {
-        OWSFail(@"Could not allocate buffer");
-    }
-
-    curve25519_donna(publicKey.mutableBytes, privateKey.mutableBytes, basepoint);
-
-    ECKeyPair *keyPair = [[ECKeyPair alloc] initWithPublicKeyData:[publicKey copy]
-                                                   privateKeyData:[privateKey copy]
-                                                            error:nil];
-    OWSAssert(keyPair != nil);
-
-    return keyPair;
+    return [ECKeyPairImpl generateKeyPair];
 }
 
 - (NSData *)throws_sign:(NSData *)data
@@ -124,20 +95,13 @@ extern int curve25519_sign(unsigned char *signature_out, /* 64 bytes */
         OWSRaiseException(NSInvalidArgumentException, @"Missing data.");
     }
 
-    NSMutableData *signatureData = [NSMutableData dataWithLength:ECCSignatureLength];
+    NSError *error;
+    NSData *signatureData = [self sign:data error:&error];
     if (!signatureData) {
-        OWSFail(@"Could not allocate buffer");
+        OWSRaiseException(NSInternalInconsistencyException, @"Message couldn't be signed: %@", error);
     }
 
-    NSData *randomBytes = [Randomness generateRandomBytes:64];
-
-    if (curve25519_sign(
-            signatureData.mutableBytes, self.privateKey.bytes, [data bytes], [data length], [randomBytes bytes])
-        == -1) {
-        OWSRaiseException(NSInternalInconsistencyException, @"Message couldn't be signed.");
-    }
-
-    return [signatureData copy];
+    return signatureData;
 }
 
 @end
