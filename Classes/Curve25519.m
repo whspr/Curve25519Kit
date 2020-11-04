@@ -3,7 +3,6 @@
 //
 
 #import "Curve25519.h"
-#import <Curve25519Kit/Curve25519Kit-Swift.h>
 #import <SignalCoreKit/OWSAsserts.h>
 #import <SignalCoreKit/Randomness.h>
 #import <SignalCoreKit/SCKExceptionWrapper.h>
@@ -13,6 +12,7 @@ NS_ASSUME_NONNULL_BEGIN
 extern void curve25519_donna(unsigned char *output, const unsigned char *a, const unsigned char *b);
 
 @interface ECKeyPair (ImplementedInSwift)
++ (Class)concreteSubclass;
 - (nullable NSData *)sign:(NSData *)data error:(NSError **)error;
 @end
 
@@ -28,14 +28,14 @@ extern void curve25519_donna(unsigned char *output, const unsigned char *a, cons
 
 + (Class)classForKeyedUnarchiver
 {
-    return [ECKeyPairImpl class];
+    return [self concreteSubclass];
 }
 
 - (nullable instancetype)initWithCoder:(nonnull NSCoder *)coder
 {
     // FIXME: This should never be called thanks to +classForKeyedUnarchiver above,
     // but there's a test in SignalServiceKit that calls it directly.
-    return [[ECKeyPairImpl alloc] initWithCoder:coder];
+    return [[[ECKeyPair concreteSubclass] alloc] initWithCoder:coder];
 }
 
 - (void)encodeWithCoder:(nonnull NSCoder *)coder
@@ -51,9 +51,9 @@ extern void curve25519_donna(unsigned char *output, const unsigned char *a, cons
                                 privateKeyData:(NSData *)privateKeyData
                                          error:(NSError **)error
 {
-    return [[ECKeyPairImpl alloc] initWithPublicKeyData:publicKeyData
-                                         privateKeyData:privateKeyData
-                                                  error:error];
+    return [[[ECKeyPair concreteSubclass] alloc] initWithPublicKeyData:publicKeyData
+                                                        privateKeyData:privateKeyData
+                                                                 error:error];
 }
 
 - (instancetype)initFromClassClusterSubclassOnly
@@ -64,7 +64,7 @@ extern void curve25519_donna(unsigned char *output, const unsigned char *a, cons
 
 + (ECKeyPair *)generateKeyPair
 {
-    return [ECKeyPairImpl generateKeyPair];
+    return [[self concreteSubclass] generateKeyPair];
 }
 
 - (NSData *)throws_sign:(NSData *)data

@@ -19,35 +19,39 @@ extension ECKeyPair: ECKeyPairFromIdentityKeyPair {}
 // TODO: Eventually we should define ECKeyPair entirely in Swift as a wrapper around IdentityKeyPair,
 // but doing that right now would break clients that are importing Curve25519.h and nothing else.
 // For now, just provide the API we'd like to have in the future via its subclass.
-public extension ECKeyPair {
-    var identityKeyPair: IdentityKeyPair {
+extension ECKeyPair {
+    public var identityKeyPair: IdentityKeyPair {
         (self as! ECKeyPairImpl).storedKeyPair
     }
 
     // TODO: Rename to publicKey(), rename existing publicKey() method to publicKeyData().
-    func ecPublicKey() throws -> ECPublicKey {
+    public func ecPublicKey() throws -> ECPublicKey {
         return ECPublicKey(self.identityKeyPair.publicKey)
     }
 
     // TODO: Rename to privateKey(), rename existing privateKey() method to privateKeyData().
-    func ecPrivateKey() throws -> ECPrivateKey {
+    public func ecPrivateKey() throws -> ECPrivateKey {
         return ECPrivateKey(self.identityKeyPair.privateKey)
+    }
+
+    @objc private class var concreteSubclass: ECKeyPair.Type {
+        return ECKeyPairImpl.self
     }
 }
 
 /// A transitionary class. Do not use directly; continue using ECKeyPair instead.
-public class ECKeyPairImpl: ECKeyPair {
+private class ECKeyPairImpl: ECKeyPair {
     private static let TSECKeyPairPublicKey = "TSECKeyPairPublicKey"
     private static let TSECKeyPairPrivateKey = "TSECKeyPairPrivateKey"
 
-    fileprivate let storedKeyPair: IdentityKeyPair
+    let storedKeyPair: IdentityKeyPair
 
-    fileprivate init(_ keyPair: IdentityKeyPair) {
+    init(_ keyPair: IdentityKeyPair) {
         storedKeyPair = keyPair
         super.init(fromClassClusterSubclassOnly: ())
     }
 
-    public override convenience init(publicKeyData: Data, privateKeyData: Data) throws {
+    override convenience init(publicKeyData: Data, privateKeyData: Data) throws {
         // Go through ECPublicKey to handle the public key data without a type byte.
         let publicKey = try ECPublicKey(keyData: publicKeyData).key
         let privateKey = try PrivateKey(privateKeyData)
@@ -55,7 +59,7 @@ public class ECKeyPairImpl: ECKeyPair {
         self.init(IdentityKeyPair(publicKey: publicKey, privateKey: privateKey))
     }
 
-    public required convenience init?(coder: NSCoder) {
+    required convenience init?(coder: NSCoder) {
         var returnedLength = 0
 
         let publicKeyBuffer = coder.decodeBytes(forKey: Self.TSECKeyPairPublicKey, returnedLength: &returnedLength)
@@ -80,7 +84,7 @@ public class ECKeyPairImpl: ECKeyPair {
         }
     }
 
-    public override func encode(with coder: NSCoder) {
+    override func encode(with coder: NSCoder) {
         // Go through ECPublicKey to drop the type byte.
         try! self.identityKeyPair.publicKey.keyBytes().withUnsafeBufferPointer {
             coder.encodeBytes($0.baseAddress, length: $0.count, forKey: Self.TSECKeyPairPublicKey)
@@ -90,11 +94,11 @@ public class ECKeyPairImpl: ECKeyPair {
         }
     }
 
-    public override class var supportsSecureCoding: Bool {
+    override class var supportsSecureCoding: Bool {
         return true
     }
 
-    public override var classForCoder: AnyClass {
+    override var classForCoder: AnyClass {
         return ECKeyPair.self
     }
 
@@ -106,11 +110,11 @@ public class ECKeyPairImpl: ECKeyPair {
         return Data(try identityKeyPair.privateKey.generateSignature(message: data))
     }
 
-    public override var publicKey: Data {
+    override var publicKey: Data {
         return Data(try! identityKeyPair.publicKey.keyBytes())
     }
 
-    public override var privateKey: Data {
+    override var privateKey: Data {
         return Data(try! identityKeyPair.privateKey.serialize())
     }
 }
