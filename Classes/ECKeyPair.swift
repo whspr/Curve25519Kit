@@ -86,10 +86,10 @@ private class ECKeyPairImpl: ECKeyPair {
 
     override func encode(with coder: NSCoder) {
         // Go through ECPublicKey to drop the type byte.
-        try! self.identityKeyPair.publicKey.keyBytes().withUnsafeBufferPointer {
+        self.identityKeyPair.publicKey.keyBytes.withUnsafeBufferPointer {
             coder.encodeBytes($0.baseAddress, length: $0.count, forKey: Self.TSECKeyPairPublicKey)
         }
-        try! self.identityKeyPair.privateKey.serialize().withUnsafeBufferPointer {
+        self.identityKeyPair.privateKey.serialize().withUnsafeBufferPointer {
             coder.encodeBytes($0.baseAddress, length: $0.count, forKey: Self.TSECKeyPairPrivateKey)
         }
     }
@@ -103,18 +103,18 @@ private class ECKeyPairImpl: ECKeyPair {
     }
 
     @objc private class func generateKeyPair() -> ECKeyPair {
-        return ECKeyPairImpl(try! IdentityKeyPair.generate())
+        return ECKeyPairImpl(IdentityKeyPair.generate())
     }
 
     @objc private func sign(_ data: Data) throws -> Data {
-        return Data(try identityKeyPair.privateKey.generateSignature(message: data))
+        return Data(identityKeyPair.privateKey.generateSignature(message: data))
     }
 
     override var publicKey: Data {
-        return Data(try! identityKeyPair.publicKey.keyBytes())
+        return Data(identityKeyPair.publicKey.keyBytes)
     }
 
     override var privateKey: Data {
-        return Data(try! identityKeyPair.privateKey.serialize())
+        return Data(identityKeyPair.privateKey.serialize())
     }
 }

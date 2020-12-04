@@ -17,7 +17,7 @@ import SignalClient
 
     @objc
     public var keyData: Data {
-        return Data(try! key.keyBytes())
+        return Data(key.keyBytes)
     }
 
     @objc
@@ -36,7 +36,7 @@ import SignalClient
     }
 
     @objc public var serialized: Data {
-        return Data(try! key.serialize())
+        return Data(key.serialize())
     }
 
     open override func isEqual(_ object: Any?) -> Bool {

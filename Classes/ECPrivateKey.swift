@@ -13,7 +13,7 @@ import SignalClient
 
     @objc
     public var keyData: Data {
-        try! Data(key.serialize())
+        Data(key.serialize())
     }
 
     @objc
