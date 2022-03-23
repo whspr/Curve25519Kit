@@ -22,7 +22,7 @@ Pod::Spec.new do |spec|
 
   spec.dependency 'CocoaLumberjack'
   spec.dependency 'SignalCoreKit'
-  spec.dependency 'SignalClient'
+  spec.dependency 'LibSignalClient', '>= 0.15.0'
 
   spec.test_spec 'Tests' do |test_spec|
     test_spec.source_files = 'BuildTests/BuildTestsTests/**/*.{h,m,swift}'
