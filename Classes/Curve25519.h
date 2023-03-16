@@ -11,11 +11,12 @@
 #define ECCSignatureLength 64
 
 @interface ECKeyPair : NSObject <NSSecureCoding> {
-    uint8_t publicKey [ECCKeyLength];
-    uint8_t privateKey[ECCKeyLength];
+    uint8_t publicKey  [ECCKeyLength];
+    uint8_t privateKey [ECCKeyLength];
 }
 
 -(NSData*) publicKey;
+-(NSData*) privateKey;
 
 @end
 
@@ -39,5 +40,13 @@
  */
 
 + (ECKeyPair*)generateKeyPair;
+
+/**
+ * Load key pair from stored public and private keys
+ *
+ * @return curve25519 key pair
+ */
+
++ (ECKeyPair*)loadFromPublicKey:(NSData*)storedPublicKey andPrivateKey:(NSData*)privateKey;
 
 @end

@@ -69,8 +69,21 @@ extern int  curve25519_sign(unsigned char* signature_out, /* 64 bytes */
     return keyPair;
 }
 
+-(id)initWithPublicKey:(NSData*)publicKey andPrivateKey:(NSData*)privateKey {
+    self = [super init];
+    if (self) {
+        memcpy(self->publicKey, [publicKey bytes], ECCKeyLength);
+        memcpy(self->privateKey, [privateKey bytes], ECCKeyLength);
+    }
+    return self;
+}
+
 -(NSData*) publicKey {
-    return [NSData dataWithBytes:self->publicKey length:32];
+    return [NSData dataWithBytes:self->publicKey length:ECCKeyLength];
+}
+
+-(NSData*) privateKey {
+    return [NSData dataWithBytes:self->privateKey length:ECCKeyLength];
 }
 
 -(NSData*) sign:(NSData*)data{
@@ -119,6 +132,11 @@ extern int  curve25519_sign(unsigned char* signature_out, /* 64 bytes */
 
 +(NSData*)generateSharedSecretFromPublicKey:(NSData *)theirPublicKey andKeyPair:(ECKeyPair *)keyPair{
     return [keyPair generateSharedSecretFromPublicKey:theirPublicKey];
+}
+
++ (ECKeyPair*)loadFromPublicKey:(NSData*)storedPublicKey andPrivateKey:(NSData*)privateKey{
+    ECKeyPair* keyPair = [[ECKeyPair alloc] initWithPublicKey:publicKey andPrivateKey: privateKey];
+    return keyPair;
 }
 
 @end
