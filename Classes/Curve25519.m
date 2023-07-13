@@ -135,7 +135,7 @@ extern int  curve25519_sign(unsigned char* signature_out, /* 64 bytes */
 }
 
 + (ECKeyPair*)loadFromPublicKey:(NSData*)storedPublicKey andPrivateKey:(NSData*)privateKey{
-    ECKeyPair* keyPair = [[ECKeyPair alloc] initWithPublicKey:publicKey andPrivateKey: privateKey];
+    ECKeyPair* keyPair = [[ECKeyPair alloc] initWithPublicKey:storedPublicKey andPrivateKey: privateKey];
     return keyPair;
 }
 
